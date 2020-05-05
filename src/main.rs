@@ -48,22 +48,28 @@ fn molde(s: &str) -> String {
         .collect()
 }
 
+fn handle_gif(keys: &GifKeys, tags: &[&str]) -> String {
+    let result = gif::gif(keys, tags);
+    let message =
+        match result {
+            Ok(gif_url) => gif_url,
+            Err(error) => {
+                eprintln!("{}", error);
+                "!?".to_string()
+            }
+        };
+    MessageBuilder::new().push(message).build()
+}
+
 struct Handler(GifKeys);
 
 impl EventHandler for Handler {
     fn message(&self, context: Context, message: Message) {
         let mut response = None;
         if message.content == "!salt" {
-            let result = gif::gif(&self.0, &SALT_TAGS);
-            let message =
-                match result {
-                    Ok(gif_url) => gif_url,
-                    Err(error) => {
-                        eprintln!("{}", error);
-                        "!?".to_string()
-                    }
-                };
-            response = Some(MessageBuilder::new().push(message).build());
+            response = Some(handle_gif(&self.0, &SALT_TAGS));
+        } else if message.content == "!mikro" {
+            response = Some(handle_gif(&self.0, &MIKRO_TAGS));
         } else {
             let mut split = message.content.splitn(2, ' ');
             if let Some("!molde") = split.next() {
