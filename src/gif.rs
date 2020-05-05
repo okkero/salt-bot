@@ -12,6 +12,16 @@ struct TenorResponse {
     results: Vec<TenorGifObject>
 }
 
+#[derive(Deserialize)]
+struct GiphyGifObject {
+    url: String
+}
+
+#[derive(Deserialize)]
+struct GiphyResponse {
+    data: GiphyGifObject
+}
+
 pub type Result<T> = reqwest::Result<T>;
 
 pub struct GifKeys {
@@ -30,9 +40,13 @@ fn tenor(key: &str, tag: &str) -> Result<String> {
 }
 
 fn giphy(key: &str, tag: &str) -> Result<String> {
-    let url = format!("https://api.giphy.com/v1/gifs/random?api_key={}&tag={}", key, tag);
+    let request_url = format!("https://api.giphy.com/v1/gifs/random?api_key={}&tag={}", key, tag);
+    let gif_url = reqwest::blocking::get(&request_url)?
+        .json::<GiphyResponse>()?
+        .data
+        .url;
 
-    Ok("Giphy WIP".to_string())
+    Ok(gif_url)
 }
 
 pub fn gif(keys: &GifKeys, tags: &[&str]) -> Result<String> {

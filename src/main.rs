@@ -58,7 +58,10 @@ impl EventHandler for Handler {
             let message =
                 match result {
                     Ok(gif_url) => gif_url,
-                    Err(error) => "!?".to_string()
+                    Err(error) => {
+                        eprintln!("{}", error);
+                        "!?".to_string()
+                    }
                 };
             response = Some(MessageBuilder::new().push(message).build());
         } else {
@@ -84,9 +87,10 @@ impl EventHandler for Handler {
 fn main() {
     let token = env::var("SALT_TOKEN").expect("Missing Discord token");
     let tenor_key = env::var("TENOR_KEY").expect("Missing Tenor key");
+    let giphy_key = env::var("GIPHY_KEY").expect("Missing Giphy key");
     let gif_keys = GifKeys {
         tenor: tenor_key,
-        giphy: "".to_string(),
+        giphy: giphy_key,
     };
     let mut client = Client::new(&token, Handler(gif_keys)).expect("Err creating client");
 
